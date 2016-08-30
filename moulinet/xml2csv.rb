@@ -17,7 +17,7 @@
 require "rexml/document"
 
 
-$Versionxml2csv = "20100930"
+$Versionxml2csv = "20160830"
 
 =begin
 	Transformer un fichier xml sconet (ElevesSansAdresses.xml) en fichier csv exploitable par moulinet.rb version 2.
@@ -75,23 +75,14 @@ def lire_fichier_xml nom_fichier
 	puts "Lecture des élèves :"
 	eleves_xml.each do |eleve_xml|
 
-=begin		eleve = {
-			:nom => eleve_xml.elements["NOM"].text,
-			:prenom => eleve_xml.elements["PRENOM"].text,
-			:date => eleve_xml.elements["DATE_NAISS"].text,
-			:doublant => eleve_xml.elements["DOUBLEMENT"].text,
-		}
-=end
 		eleve = {}
 
-#		eleve[:nom] 		= eleve_xml.elements["NOM"].text 	unless eleve_xml.elements["NOM"].nil?
-# Le champs "NOM" est remplacé par "NOM_DE_FAMILLE" :
+		# Le champ "NOM" est remplacé par "NOM_DE_FAMILLE" :
 		eleve[:nom] 		= eleve_xml.elements["NOM_DE_FAMILLE"].text 	unless eleve_xml.elements["NOM_DE_FAMILLE"].nil?
 		eleve[:prenom] 		= eleve_xml.elements["PRENOM"].text 	unless eleve_xml.elements["PRENOM"].nil?
 		eleve[:date] 		= eleve_xml.elements["DATE_NAISS"].text	unless eleve_xml.elements["DATE_NAISS"].nil?
 		eleve[:doublant] 	= eleve_xml.elements["DOUBLEMENT"].text	unless eleve_xml.elements["DOUBLEMENT"].nil?
 
-#		eleve[:divprec]		= eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].text.gsub(/ /, '') unless eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].nil?
 		eleve[:divprec]		= eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].text unless eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].nil?
 		eleve[:divprec]		= eleve[:divprec].gsub(/ /, '') unless eleve[:divprec].nil?
 
@@ -180,4 +171,3 @@ else
 	puts "Si le fichier csv n'est pas indiqué, un fichier <fichier.xml>.csv sera créé"
 	puts ""
 end
-
