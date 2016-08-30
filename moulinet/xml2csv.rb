@@ -27,7 +27,9 @@ $Versionxml2csv = "20100930"
 
 
 def afficher_eleve(eleve)
-	affichage = eleve[:nom] + " " + eleve[:prenom] + " " + eleve[:date] unless eleve == nil
+	affichage = eleve[:nom] unless eleve == nil
+	affichage += " " + eleve[:prenom] unless eleve[:prenom].nil?
+	affichage += " " + eleve[:date] unless eleve[:date].nil?
 	affichage += " " + eleve[:div] unless eleve[:div].nil?
 	affichage += " " + eleve[:divprec] unless eleve[:divprec].nil?
 
@@ -73,17 +75,30 @@ def lire_fichier_xml nom_fichier
 	puts "Lecture des élèves :"
 	eleves_xml.each do |eleve_xml|
 
-		eleve = {
+=begin		eleve = {
 			:nom => eleve_xml.elements["NOM"].text,
 			:prenom => eleve_xml.elements["PRENOM"].text,
 			:date => eleve_xml.elements["DATE_NAISS"].text,
 			:doublant => eleve_xml.elements["DOUBLEMENT"].text,
 		}
-		eleve[:divprec] = eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].text.gsub(/ /, '') unless eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].nil?
-		eleve[:date_entree] = eleve_xml.elements["DATE_ENTREE"].text unless eleve_xml.elements["DATE_ENTREE"].nil?
-		eleve[:date_sortie] = eleve_xml.elements["DATE_SORTIE"].text unless eleve_xml.elements["DATE_SORTIE"].nil?
-		eleve[:id_national] = eleve_xml.elements["ID_NATIONAL"].text unless eleve_xml.elements["ID_NATIONAL"].nil?
-		eleve[:id_eleve_etab] = eleve_xml.elements["ID_ELEVE_ETAB"].text unless eleve_xml.elements["ID_ELEVE_ETAB"].nil?
+=end
+		eleve = {}
+
+#		eleve[:nom] 		= eleve_xml.elements["NOM"].text 	unless eleve_xml.elements["NOM"].nil?
+# Le champs "NOM" est remplacé par "NOM_DE_FAMILLE" :
+		eleve[:nom] 		= eleve_xml.elements["NOM_DE_FAMILLE"].text 	unless eleve_xml.elements["NOM_DE_FAMILLE"].nil?
+		eleve[:prenom] 		= eleve_xml.elements["PRENOM"].text 	unless eleve_xml.elements["PRENOM"].nil?
+		eleve[:date] 		= eleve_xml.elements["DATE_NAISS"].text	unless eleve_xml.elements["DATE_NAISS"].nil?
+		eleve[:doublant] 	= eleve_xml.elements["DOUBLEMENT"].text	unless eleve_xml.elements["DOUBLEMENT"].nil?
+
+#		eleve[:divprec]		= eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].text.gsub(/ /, '') unless eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].nil?
+		eleve[:divprec]		= eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].text unless eleve_xml.elements["SCOLARITE_AN_DERNIER/CODE_STRUCTURE"].nil?
+		eleve[:divprec]		= eleve[:divprec].gsub(/ /, '') unless eleve[:divprec].nil?
+
+		eleve[:date_entree]	= eleve_xml.elements["DATE_ENTREE"].text unless eleve_xml.elements["DATE_ENTREE"].nil?
+		eleve[:date_sortie]	= eleve_xml.elements["DATE_SORTIE"].text unless eleve_xml.elements["DATE_SORTIE"].nil?
+		eleve[:id_national]	= eleve_xml.elements["ID_NATIONAL"].text unless eleve_xml.elements["ID_NATIONAL"].nil?
+		eleve[:id_eleve_etab]	= eleve_xml.elements["ID_ELEVE_ETAB"].text unless eleve_xml.elements["ID_ELEVE_ETAB"].nil?
 
 		eleve[:eleve_id] = eleve_xml.attribute("ELEVE_ID").to_s
 
