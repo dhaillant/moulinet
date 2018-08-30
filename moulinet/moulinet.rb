@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-$VersionMoulinet = "20170914"
+$VersionMoulinet = "20180830"
 
 
 =begin
@@ -33,7 +33,9 @@ $VersionMoulinet = "20170914"
 	iconv -f ISO-8859-1 -t UTF-8 ElevesSansAdresses.xml.csv > ElevesSansAdresses.xml.csv.utf8
 =end
 
-$div_exclues = "PROFS INFO SETUP GRETA STAGES EXAMEN SURVEILLANTS INTERNES AGENTS WEB QUADOR"
+$div_exclues = File.read("div_exclues.conf")
+
+
 $profil_web_eleve = "eleves"
 
 
@@ -348,21 +350,24 @@ def afficher_10_premiers(eleves)
 	puts "Total = " + eleves.length.to_s + "\n\n"
 end
 
-#trouver les nouveaux
-#def trouver_nouveaux(liste_sconet, options = [], liste_kwartz = [])
+
 def trouver_nouveaux liste_sconet, liste_kwartz
 # anciens est la liste des élèves importées depuis kwartz
 # actuels est la liste des élèves d'après sconet
 	nouveaux = []
 
 
-	# nouvelle méthode, par comparaison nom, prenom, idnat, (entree et sortie)
 	liste_sconet.each do |eleve_sconet|
 		trouve = false
 		liste_kwartz.each do |eleve_kwartz|
+			# par comparaison nom, prenom, idnat, (entree et sortie)
 			if (eleve_sconet[:nom] == eleve_kwartz[:nom]) and (eleve_sconet[:prenom] == eleve_kwartz[:prenom]) and (eleve_sconet[:idnat] == eleve_kwartz[:idext])
 				trouve = true	# si l'élève correspond, on dit qu'il est trouvé
 			end
+			# par comparaison nom, prenom, (entree et sortie)
+			#if (eleve_sconet[:nom] == eleve_kwartz[:nom]) and (eleve_sconet[:prenom] == eleve_kwartz[:prenom])
+			#	trouve = true	# si l'élève correspond, on dit qu'il est trouvé
+			#end
 		end
 		if trouve == false	# s'il n'a pas été trouvé, c'est qu'il est nouveau
 			# si il a une classe et qu'il n'est pas sorti, c'est qu'il est vraiment nouveau, hein, bon
@@ -381,7 +386,7 @@ end
 #trouver les disparus
 def trouver_disparus(liste_sconet, liste_kwartz)
 =begin
-	les disparus sont les élèves donnés par kwartz, mais introuvable dans la liste sconet.
+	les disparus sont les élèves donnés par kwartz, mais introuvables dans la liste sconet.
 	attention aux faux positifs (ortographe, id nat différent...)
 	proposer une liste différente de la liste des sortants.
 =end
@@ -526,6 +531,7 @@ def trouver_modifies(liste_sconet, liste_kwartz)
 
 # trouver les élèves par IDNAT ayant changé de div, non sortant
 #			if (eleve_sconet[:idnat] == eleve_kwartz[:idext]) and (eleve_sconet[:div] != eleve_kwartz[:div]) and (eleve_sconet[:sortie] == "") and (eleve_kwartz[:idext] != "") and (eleve_sconet[:div] != "")
+
 # trouver les élèves par IDNAT ayant changé de div OU marqués "modifiés" (ex. affectation IDEXT), non sortant
 			if (eleve_sconet[:idnat] == eleve_kwartz[:idext]) and ((eleve_sconet[:div] != eleve_kwartz[:div]) or (eleve_kwartz[:modifie] == true)) and (eleve_sconet[:sortie] == "") and (eleve_kwartz[:idext] != "") and (eleve_sconet[:div] != "")
 				# si l'élève correspond,
@@ -543,9 +549,6 @@ def trouver_modifies(liste_sconet, liste_kwartz)
 				eleve_sconet[:idext]			= eleve_kwartz[:idext]
 				eleve_sconet[:profilwin]		= eleve_kwartz[:profilwin]
 				eleve_sconet[:profilweb]		= eleve_kwartz[:profilweb]
-				eleve_sconet[:droits]			= eleve_kwartz[:droits]
-				eleve_sconet[:invite]			= eleve_kwartz[:invite]
-				eleve_sconet[:responsable]		= eleve_kwartz[:responsable]
 
 				# on l'ajoute aux élèves à modifier
 				modifies.push eleve_sconet
@@ -567,7 +570,6 @@ def trouver_inchanges liste_sconet, liste_kwartz
 		eleve = liste_sconet.detect { |eleve_sconet| eleve_sconet[:idnat] == eleve_kwartz[:idext] && eleve_sconet[:div] == eleve_kwartz[:div] && eleve_sconet[:idnat] != "" }
 		unless eleve.nil?
 
-
 			# on récupère les infos intéressantes
 			eleve[:login]			= eleve_kwartz[:login]
 			eleve[:nlogin]			= eleve_kwartz[:nlogin]
@@ -582,11 +584,6 @@ def trouver_inchanges liste_sconet, liste_kwartz
 			eleve[:profilwin]		= eleve_kwartz[:profilwin]
 			#eleve[:profilweb]		= eleve_kwartz[:profilweb]
 			eleve[:profilweb]		= $profil_web_eleve
-			eleve[:droits]			= eleve_kwartz[:droits]
-			eleve[:invite]			= eleve_kwartz[:invite]
-			eleve[:responsable]		= eleve_kwartz[:responsable]
-
-
 
 
 			inchanges.push eleve
@@ -746,6 +743,7 @@ if fichier_kwartz.length > 0 and fichier_sconet.length > 0 then
 	puts "\n\n"
 
 	# utilisateurs faisant parties de classes blacklistées :
+	puts "Divisions exclues : " + $div_exclues
 	puts "Utilisateurs Kwartz exclus de la moulinette :"
 	exclus = trouver_exclus(liste_kwartz, $div_exclues)
 	afficher_10_premiers exclus
@@ -772,19 +770,15 @@ if fichier_kwartz.length > 0 and fichier_sconet.length > 0 then
 	afficher_10_premiers disparus
 	
 	puts "Élèves à modifier :"
-#	modifies = trouver_modifies liste_sconet, liste_kwartz - sortants - exclus
 	modifies = trouver_modifies liste_sconet, liste_kwartz
 	afficher_10_premiers modifies
 	
 	puts "Élèves à ajouter :"
-#	nouveaux = trouver_nouveaux liste_sconet, {:sur_nom_prenom => true}, liste_kwartz - sortants - exclus
 	nouveaux = trouver_nouveaux liste_sconet, liste_kwartz
 	nouveaux = creer_logins nouveaux, liste_kwartz - sortants - exclus
 	afficher_10_premiers nouveaux
 	
 	puts "Élèves inchangés :"
-	#inchanges = liste_kwartz - modifies - sortants - exclus
-#	inchanges = trouver_inchanges liste_kwartz, modifies, sortants, exclus
 	inchanges = trouver_inchanges liste_sconet, liste_kwartz
 	afficher_10_premiers inchanges
 
