@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-$VersionMoulinet = "20150827"
+$VersionMoulinet = "20170914"
 
 
 =begin
@@ -33,12 +33,9 @@ $VersionMoulinet = "20150827"
 	iconv -f ISO-8859-1 -t UTF-8 ElevesSansAdresses.xml.csv > ElevesSansAdresses.xml.csv.utf8
 =end
 
-$div_exclues = "PROFS INFO SETUP GRETA STAGE TOS EXAMEN SURVEILLANTS INTERNES AGENTS QUADOR CREPS QUA2014"
+$div_exclues = "PROFS INFO SETUP GRETA STAGES EXAMEN SURVEILLANTS INTERNES AGENTS WEB QUADOR"
 $profil_web_eleve = "eleves"
 
-#$ClassesLycee = "1COM1 1COM2 1EL 1MEI 1RCI 1SEN 1TCI 1TU 2COM1 2COM2 2EL 2MEI 2SEN 2TCI 2TUPI 3DP6 TCOM1 TCOM2 TCOM3 TEL TMEI TRCI TSEN TTCI TTU 2TU 1COM3 1EL1 1TCI1 1TCI2 TCOM TEL1 TEL2 TROC "
-# 2012 :
-#$ClassesLycee = "1COM1 1COM2 1EL 1MEI 1PROE 1RCI 1SEN 1TCI 1TUPI 2COM1 2COM2 2EL 2MEI 2SEN 2TCI 2TUPI 3DP6 TCOM1 TCOM2 TEL TMEI TPROE TRCI TSEN TTCI TTUPI 1TU TTU"
 
 $EnteteKwartz = "#Nom;Prénom;groupe d'affectation;login actuel;nouveau login;mot de passe;droits;groupes invités;groupes responsable;serveur mail externe; login mail externe; mot de passe mail externe; adresse email; identifiant externe; profil windows; profil d'accès à internet"
 $EnteteKwartz = "#Nom;Prénom;groupe d'affectation;login actuel;nouveau login;mot de passe;droits;groupes invités;groupes responsable;serveur mail externe; login mail externe; mot de passe mail externe; adresse email; identifiant externe; profil windows; profil d'accès à internet; compte désactivé"
@@ -77,27 +74,7 @@ end
 
 class Liste_eleves < Array
 
-=begin
-	def - (autre_liste)
-		nouvelle_liste = Liste_eleves.new
 
-		self.each do |s|
-			trouve = false
-			#if autre_liste.find {|a| (a[:idnat] == s[:idnat]) or (a[:idnat] == s[:idext]) or (a[:idext] == s[:idnat]) }
-			#	nouvelle_liste.push s
-			#end
-			autre_liste.each do |a|
-				if a[:nom] == s[:nom]
-					trouve = true
-				end
-			end
-			if trouve == false
-				nouvelle_liste.push s
-			end
-		end
-		return nouvelle_liste
-	end
-=end
 end
 
 
@@ -120,6 +97,7 @@ def lire_liste_kwartz(fichier)
 	
 	File.open(fichier).each do |record|
 		fields = []
+
 		record.split(";").each do |field|
 			field.chomp!
 			fields.push field
@@ -128,29 +106,7 @@ def lire_liste_kwartz(fichier)
 
 #Nom 0;Pr�nom 1;groupe d'affectation 2;login actuel 3;nouveau login 4;mot de passe 5;droits 6;groupes invit�s 7;groupes responsable 8;serveur mail externe 9; login mail externe 10; mot de passe mail externe 11; adresse email 12; identifiant externe 13; profil windows 14; profil d'acc�s � internet 15
 			eleve = Eleve.new
-=begin
-			eleve = {
-				:nom => fields[0].gsub(/[\s']/, ''),
-				:prenom => fields[1],
-				:iprenom => fields[1], #[0].chr,
-				:date => "",	# la date n'est pas fournie par kwartz
-				:div => fields[2].upcase, #.gsub(/["=]/, ''),
-				:login => fields[3],
-				:nlogin => fields[3].scan(/[\d]/)[0],	# numéro ajouté en cas de doublon
-				:divprec => "",		# non fourni par kwartz
-				:doublant => "",	# non fourni par kwartz
-				:droits => fields[6],
-				:invite => fields[7],
-				:responsable => fields[8],
-				:serveurmailext => fields[9],
-				:loginmailext => fields[10],
-				:mdpmailext => fields[11],
-				:mail => fields[12],
-				:idext => fields[13],
-				:profilwin => fields[14],
-				:profilweb => fields[15]
-			}
-=end
+
 			eleve[:nom] = fields[0].gsub(/[\s']/, '')
 			eleve[:prenom] = fields[1]
 			eleve[:iprenom] = fields[1] #[0].chr,
@@ -264,26 +220,7 @@ def lire_liste_sconet(fichier)
 		if fields[0] != "NOM"	#ne pas prendre l'entête
 			eleve = Eleve.new
 
-=begin
-			eleve = {
-				:nom => fields[col_NOM].gsub(/[-'\s]/, ''),	# pas d'espaces ni de ' ni de -
-				:prenom => fields[col_PRENOM], #.suppr_accents, #.tr($Accents, $SansAccents),
-				:iprenom => fields[col_PRENOM][0].chr,
-				:date => fields[col_DATE].gsub("/", ''),
-				:div => fields[col_DIV].gsub(/["=]/, '').upcase,
-#				:div => fields[3].scan(/"="".*"""/).to_s,".+"
-				:login => "",
-				:nlogin => 0,
-				:divprec => fields[col_DIVPREC].gsub(/["=]/, '').upcase,
-				:doublant => fields[col_DOUBLANT],
 
-			# nouveau avec xml2csv :
-				:entree => fields[col_ENTREE],
-				:sortie => fields[col_SORTIE],
-				:idnat => fields[col_IDNAT]
-				#:ideletab => fields[col_IDELETAB]
-			}
-=end
 
 			eleve[:nom] = fields[col_NOM].gsub(/[-'\s]/, '')	# pas d'espaces ni de ' ni de -
 			eleve[:prenom] = fields[col_PRENOM]
@@ -373,35 +310,13 @@ def ecrire_fichier_info(eleves, fichier)
 	return n
 end
 
-=begin
-def ecrire_fichier_exclus(eleves, fichier)
-	f = File.open(fichier, "w")
-	f.puts "#Fichier créé avec moulinet.rb version #{$VersionMoulinet}, le #{Time.now}. Fichier pour information uniquement ! Ne pas importer !"
-	f.puts $EnteteKwartz
-
-	n = 0
-	eleves.each do |e|
-		f.puts "#{e[:nom]};#{e[:prenom]};#{e[:div]};#{e[:login]};#{e[:login]};;;;;;;;;;;"
-		n += 1
-	end
-
-	return n
-end
-=end
 
 def afficher_eleve(eleve, index=0)
-#	puts eleve[:nom] + " " + eleve[:prenom] + " " + eleve[:iprenom] + " " + eleve[:login] + " " + eleve[:div] + " " + eleve[:date] + " " + eleve[:idext] + "\n" unless eleve == nil
 	unless eleve == nil
-		#texte = " #{eleve[:nom]}\t#{eleve[:prenom]}\t#{eleve[:login]}\t#{eleve[:div]} #{eleve[:date]} #{eleve[:idext] unless eleve[:idext] == nil}"
-		#idext = ""		
-		#idext = eleve[:idext] unless eleve[:idext] == nil
+
 		texte = "    "
 		texte = " %3d" % index if index > 0
 		texte += " %-12s %-12s %-14s %-8s %-8s %-9s %-11s %-11s %-8s" % [eleve[:nom], eleve[:prenom], eleve[:login], eleve[:div], eleve[:divprec], eleve[:date], eleve[:idext],  eleve[:idnat], eleve[:sortie]]
-		#texte += " " + eleve[:idnat] unless eleve[:idnat] == nil
-		#texte = eleve[:nom] + " " + eleve[:prenom] + " " + eleve[:iprenom] + " " + eleve[:login] + " " + eleve[:div] + " " + eleve[:date]
-		#texte += " " + eleve[:idext] unless eleve[:idext] == nil
-		#texte += " " + eleve[:idnat] unless eleve[:idnat] == nil
 	end
 	puts texte unless texte == nil
 end
@@ -440,29 +355,6 @@ def trouver_nouveaux liste_sconet, liste_kwartz
 # actuels est la liste des élèves d'après sconet
 	nouveaux = []
 
-=begin
-	# anciennes méthodes :
-	if options[:sur_div_prec] == true
-		liste_sconet.each do |eleve|
-			unless $ClassesLycee.include? eleve_sconet[:divprec]
-				# si la précédente classe de l'élève n'appartient pas au lycée on dit qu'il est nouveau
-				nouveaux.push eleve_sconet
-			end
-		end
-	elsif options[:sur_nom_prenom] == true
-		liste_sconet.each do |eleve_sconet|
-			trouve = false
-			liste_kwartz.each do |eleve_kwartz|
-				if (eleve_sconet[:nom] == eleve_kwartz[:nom]) and (eleve_sconet[:prenom] == eleve_kwartz[:prenom])
-					trouve = true	# si l'élève correspond, on dit qu'il est trouvé
-				end
-			end
-			if trouve == false	# s'il n'a pas été trouvé, c'est qu'il est nouveau
-				nouveaux.push eleve_sconet
-			end
-		end
-	end
-=end
 
 	# nouvelle méthode, par comparaison nom, prenom, idnat, (entree et sortie)
 	liste_sconet.each do |eleve_sconet|
@@ -586,39 +478,17 @@ def trouver_sortants(liste_sconet, liste_kwartz)
 					eleve_sconet[:profilweb]	= eleve_kwartz[:profilweb]
 
 					sortants.push eleve_sconet
-					#sortants.push eleve_kwartz
-					#puts eleve_kwartz[:nom] + " " + eleve_sconet[:nom]
+
 				else
 					# l'élève n'est pas dans la liste Kwartz : on l'ignore, mais on le comptabilise
-					#puts "sortant non trouvé : #{eleve_sconet[:nom]} #{eleve_sconet[:idnat]}"  
 					non_trouves += 1
 				end
 			end
 
-			#eleve_sorti = liste_kwartz.find {|e| e[:idext] == eleve_sconet[:idnat] }
 
-			#p eleve_sconet
-			#p eleve_sorti unless eleve_sorti == nil
-
-#			if $ClassesLycee.include? eleve_sorti[:div]
-			#	sortants.push eleve_sorti unless eleve_sorti == nil
-				#liste_kwartz[:idext => 
-#			end
 		end
 
-=begin
-		# si l'élève n'a pas de div affectée
-		if (eleve_sconet[:div]) == ""
-			# si l'élève a un idnat
-			if eleve_sconet[:idnat] != ""
-				# si l'élève est dans la liste kwartz, c'est qu'il faut le supprimer de kwartz !
-				eleve_kwartz = liste_kwartz.find {|e| e[:idext] == eleve_sconet[:idnat] }
-				if eleve_kwartz !=  nil
-					sortants.push eleve_kwartz
-				end
-			end
-		end
-=end
+
 	end
 
 	puts "Eleves Sconet sortants non trouvés dans la liste Kwartz (ignorés) : #{non_trouves}"
@@ -687,46 +557,12 @@ end
 
 # trouver les inchangés
 # inchanges = liste_kwartz - modifies - sortants
-# !!!!!!!!!!!! BUGGé !!!!!!!!!!!!
-=begin
-def trouver_inchanges(liste_kwartz, modifies, sortants, exclus)
-	inchanges = []
-	liste_kwartz.each do |eleve_kwartz|
-		trouve = false
-		modifies.each do |mod|
-			if (eleve_kwartz[:nom] == mod[:nom]) and (eleve_kwartz[:prenom] == mod[:prenom]) and (eleve_kwartz[:div] == mod[:divprec])
-				# si l'élève correspond,
-				trouve = true
-			end
-		end
-		sortants.each do |disp|
-			if (eleve_kwartz[:nom] == disp[:nom]) and (eleve_kwartz[:prenom] == disp[:prenom]) and (eleve_kwartz[:div] == disp[:div])
-				# si l'élève correspond,
-				trouve = true
-			end
-		end
 
-		exclus.each do |exc|
-			if (eleve_kwartz[:nom] == exc[:nom]) and (eleve_kwartz[:prenom] == exc[:prenom]) and (eleve_kwartz[:div] == exc[:div])
-				# si l'élève correspond,
-				trouve = true
-			end
-		end
-
-		if not trouve	# si pas trouvé,
-			# on l'ajoute aux élèves inchanges
-			inchanges.push eleve_kwartz
-		end
-	end
-	return inchanges
-=end
-# !!!!!!!!!!!! BUGGé !!!!!!!!!!!!
 
 def trouver_inchanges liste_sconet, liste_kwartz
 	inchanges = []
 
 	liste_kwartz.each do |eleve_kwartz|
-		# print "."
 		# attention : ne détecte pas les supprimés !
 		eleve = liste_sconet.detect { |eleve_sconet| eleve_sconet[:idnat] == eleve_kwartz[:idext] && eleve_sconet[:div] == eleve_kwartz[:div] && eleve_sconet[:idnat] != "" }
 		unless eleve.nil?
@@ -753,8 +589,6 @@ def trouver_inchanges liste_sconet, liste_kwartz
 
 
 
-			#p eleve_kwartz
-			#p eleve
 			inchanges.push eleve
 		end
 	end
@@ -785,12 +619,10 @@ def creer_logins(liste_nouveaux, liste_kwartz)
 	# pour tous les nouveaux, proposer un login
 	# voir dans liste complétée si le login existe déjà. si existant, proposer un nouveau login et rester
 	liste_nouveaux.each do |nouveau|
-#		login = nouveau[:iprenom].downcase + "." + nouveau[:nom].downcase
 		login = suppr_accents(nouveau[:iprenom]).downcase + "." + suppr_accents(nouveau[:nom]).downcase
 		login_ok = false
 		i = 0
 		while login_ok == false
-#			print "."
 			if trouver_doublons(login, liste_completee).length == 0
 				login_ok = true
 				nouveau[:login] = login
@@ -929,16 +761,7 @@ if fichier_kwartz.length > 0 and fichier_sconet.length > 0 then
 		puts "Tous les élèves KWARTZ ont un ID National, Ok."
 	end
 
-	# tester si absence de idnat/idext dans liste_kwartz
-=begin	if liste_kwartz.any? { |eleve| eleve[:idext] == "" && (not $div_exclues.include? eleve[:div]) }
-		puts "Des élèves KWARTZ n'ont pas d'ID National !"
 
-		liste_kwartz = affecter_id_national liste_sconet, liste_kwartz
-
-	else
-		puts "Tous les élèves KWARTZ ont un ID National, Ok."
-	end
-=end
 
 	puts "Élèves à supprimer (sortants) :"
 	sortants = trouver_sortants liste_sconet, liste_kwartz
@@ -968,12 +791,7 @@ if fichier_kwartz.length > 0 and fichier_sconet.length > 0 then
 	puts "Élèves doublants :"
 	doublants = compter_doublants liste_sconet
 	puts doublants.to_s
-=begin
-	puts "Élèves rescapés :"
-	eleves_rescapes = trouver_rescapes eleves_ancienne_liste, nouvelle_liste
-	nombre_eleves_rescapes = eleves_rescapes.length
-	afficher_10_premiers eleves_rescapes
-=end
+
 
 	puts "\n\n"
 	puts "Vérifications :\n\n"
@@ -999,36 +817,7 @@ if fichier_kwartz.length > 0 and fichier_sconet.length > 0 then
 	puts nouveaux.length + modifies.length + inchanges.length
 
 
-#	puts "\n"
-#	puts "liste_kwartz - exclus - sortants - modifies :"
-#	puts liste_kwartz.length - exclus.length - sortants.length - modifies.length
-#	puts ""
 
-#vérif supplémentaire, car j'y comprends plus rien :
-# non ! sconet inclu des élèves qui n'ont jamais été au lycée + les sortants. il faut recalculer !
-#	ideal = liste_sconet.length
-#	reel = nouveaux.length + inchanges.length + modifies.length
-#	reel = nouveaux.length + modifies.length
-#	puts "nombre d'utilisateurs atteint     : nouveaux + inchanges + modifies = #{reel}"
-#	puts "nombre d'utilisateurs atteint     : nouveaux + modifies = #{reel}"
-#	puts ""
-#	ideal = liste_sconet.length + exclus.length
-#	puts "nombre d'utilisateurs à atteindre : sconet + exclus = #{ideal}"
-#	reel = exclus.length + nouveaux.length + inchanges.length + modifies.length
-#	puts "nombre d'utilisateurs atteint     : exclus + nouveaux + inchanges + modifies = #{reel}"
-
-=begin
-	puts "nombre d'élèves de l'ancienne liste (#{nombre_eleves_ancienne_liste}) = nombre d'élèves à modifier (#{nombre_eleves_a_modifier}) + nombre d'élèves à supprimer (#{nombre_eleves_disparus}) + nombre d'élèves rescapés (#{nombre_eleves_rescapes})"
-	puts nombre_eleves_ancienne_liste.to_s + " = " + (nombre_eleves_a_modifier + nombre_eleves_disparus + nombre_eleves_rescapes).to_s
-	puts "OK" if nombre_eleves_ancienne_liste == (nombre_eleves_a_modifier + nombre_eleves_disparus + nombre_eleves_rescapes)
-	
-	puts "nombre d'élèves de la nouvelle liste (#{nouvelle_liste.length}) = nombre d'élèves à modifier (#{nombre_eleves_a_modifier}) + nombre d'élèves à ajouter (#{nombre_nouveaux_eleves})"
-	puts nouvelle_liste.length.to_s + " = " + (nombre_eleves_a_modifier + nombre_nouveaux_eleves).to_s
-	puts "OK" if nouvelle_liste.length == (nombre_eleves_a_modifier + nombre_nouveaux_eleves)
-	
-	#puts "reste à faire : trouver les homonymes (voir trouver_nouveaux)"
-	nouveaux_eleves_dedoublones = trouver_et_modifier_doublons nouveaux_eleves, eleves_a_modifier, eleves_rescapes
-=end
 	
 	ecrire_fichier_nouveaux 	nouveaux, 	"comptes_a_ajouter.txt"
 	ecrire_fichier_modifies 	modifies, 	"comptes_a_modifier.txt"
@@ -1044,8 +833,8 @@ else
 	puts "Les fichiers traités doivent être au format UTF-8"
 	puts ""
 	puts "Les traiter ainsi :"
-	#puts "iconv -f ISO-8859-1 -t UTF-8 EXP_Liste_des_eleves_par_division.csv > EXP_Liste_des_eleves_par_division.csv.utf8"
 	puts "iconv -f ISO-8859-1 -t UTF-8 ElevesSansAdresses.xml.csv > ElevesSansAdresses.xml.csv.utf8"
+	puts "iconv -f ISO-8859-1 -t UTF-8 20170901.export.txt > 20170901.export.txt.utf8"
 	puts ""
 
 end
