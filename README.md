@@ -32,7 +32,7 @@ Les fichiers produits sont sous la forme CSV et doivent impérativement être v�
 En effet, les résultats sont parfois incomplets et/ou erronés, notamment lorsqu'il y a présence d'homonymes, d'erreurs de typo dans la base officielle, etc.
 Principales erreurs : homonymes, élèves non supprimés, IDNAT différent, etc.
 
-Important : le format des logins élèves suit le schéma <initiale du prénom>.<nom>
+Important : le format des logins élèves suit le schéma [initiale du prénom].[nom]
 
 
 Les fichiers CSV doivent être au format UTF-8
